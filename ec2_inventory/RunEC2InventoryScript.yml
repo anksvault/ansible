@@ -1,0 +1,31 @@
+---
+#-------------------------------------------------------------------------------------------#
+# Author      : Ankit Sharma                                                                #
+# Playbook    : RunEC2InventoryScript.yml                                                   #
+# Description : Playbook to run custom EC2 Inventory Script                                 #
+# Target      : AWX Host Machine, AWX_TASK Container                                        #
+#-------------------------------------------------------------------------------------------#
+
+- name: RunEC2InventoryScript
+  hosts: all
+  vars:
+      ec2_secret_key: "{{ AWS_SECRET_ACCESS_KEY }}"
+      ec2_access_key: "{{ AWS_ACCESS_KEY_ID }}"
+  environment:
+      AWS_ACCESS_KEY_ID: "{{ ec2_access_key }}"
+      AWS_SECRET_ACCESS_KEY: "{{ ec2_secret_key }}"
+  gather_facts: false
+  tasks:
+    - name: Execute EC2 Inventory Script
+      script: files/ec2_inventory.py
+      ignore_errors: True
+      args:
+        executable: python
+      register: myregister
+
+    - name: Execution Results
+      debug:
+        msg: 'OUTPUT: {{ myregister.stdout }}'
+      when: myregister.stdout != ""
+
+...
